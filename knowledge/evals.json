@@ -1,0 +1,24 @@
+[
+  { "question": "How many days of annual leave do I get?", "source": "leave-policy.md", "must_contain": "27 days" },
+  { "question": "Until when can I use carried-over leave days?", "source": "leave-policy.md", "must_contain": "31 March" },
+  { "question": "When do I need a doctor's note for sick leave?", "source": "leave-policy.md", "must_contain": "4th consecutive day" },
+  { "question": "How long is parental leave for the primary caregiver?", "source": "leave-policy.md", "must_contain": "20 weeks" },
+  { "question": "What are the core working hours?", "source": "working-hours-and-remote.md", "must_contain": "10:00 to 15:00" },
+  { "question": "Which days are anchor days?", "source": "working-hours-and-remote.md", "must_contain": "Tuesday and Thursday" },
+  { "question": "How long can I work from another country?", "source": "working-hours-and-remote.md", "must_contain": "30 days" },
+  { "question": "What is the hotel limit in a capital city?", "source": "expenses-and-travel.md", "must_contain": "€240" },
+  { "question": "Can I fly premium economy on a 7-hour flight?", "source": "expenses-and-travel.md", "must_contain": "6 hours or more" },
+  { "question": "What is the meal allowance for international travel?", "source": "expenses-and-travel.md", "must_contain": "€75" },
+  { "question": "I lost my laptop at the airport, what do I do?", "source": "it-and-security.md", "must_contain": "within 2 hours" },
+  { "question": "Can I paste customer contracts into ChatGPT?", "source": "it-and-security.md", "must_contain": "never be pasted into external AI tools" },
+  { "question": "How much is the yearly learning budget?", "source": "benefits-and-wellbeing.md", "must_contain": "€1,500" },
+  { "question": "How much does the company match for pension?", "source": "benefits-and-wellbeing.md", "must_contain": "6%" },
+  { "question": "How long is the probation period?", "source": "onboarding.md", "must_contain": "6 months" },
+  { "question": "When are promotions decided?", "source": "performance-and-growth.md", "must_contain": "October cycle" },
+  { "question": "Can I keep a €100 gift from a supplier?", "source": "code-of-conduct.md", "must_contain": "€50" },
+  { "question": "Who founded Brindlewick?", "source": "company-overview.md", "must_contain": "Marisol Ekwueme" },
+
+  { "question": "Do employees get a company car?", "source": null, "must_contain": null },
+  { "question": "What is the CEO's salary?", "source": null, "must_contain": null },
+  { "question": "What is Brindlewick's stock ticker?", "source": null, "must_contain": null }
+]
