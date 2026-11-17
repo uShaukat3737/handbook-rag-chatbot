@@ -1,98 +1,62 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { useRef } from 'react';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
+import { ChatInput } from '@/components/chat-input';
+import { MessageBubble } from '@/components/message-bubble';
+import { SuggestedPrompts } from '@/components/suggested-prompts';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useChat, type UiMessage } from '@/hooks/use-chat';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+function EmptyState() {
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <ThemedView style={styles.empty}>
+      <ThemedText type="subtitle">Brindlewick Handbook</ThemedText>
+      <ThemedText themeColor="textSecondary">
+        Ask about leave, expenses, IT, benefits and more. Tap a suggestion below to try it.
+      </ThemedText>
+    </ThemedView>
   );
 }
 
-export default function HomeScreen() {
+// Expo Router requires a default export for route files.
+export default function ChatScreen() {
+  const { messages, pending, error, send } = useChat();
+  const list = useRef<FlatList<UiMessage>>(null);
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+    <ThemedView style={styles.screen}>
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <KeyboardAvoidingView style={styles.safe} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <FlatList
+            ref={list}
+            data={messages}
+            keyExtractor={(m) => String(m.id)}
+            renderItem={({ item }) => <MessageBubble message={item} />}
+            ListEmptyComponent={EmptyState}
+            contentContainerStyle={styles.list}
+            onContentSizeChange={() => list.current?.scrollToEnd({ animated: true })}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
+          {pending && <ActivityIndicator style={styles.status} />}
+          {error && (
+            <ThemedText type="small" themeColor="textSecondary" style={styles.status} accessibilityRole="alert">
+              {error}
+            </ThemedText>
+          )}
+          <SuggestedPrompts onPick={send} disabled={pending} />
+          <ChatInput onSend={send} disabled={pending} />
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  screen: { flex: 1 },
+  safe: { flex: 1, width: '100%', maxWidth: MaxContentWidth, alignSelf: 'center' },
+  list: { flexGrow: 1, padding: Spacing.three },
+  empty: { flex: 1, justifyContent: 'center', gap: Spacing.two },
+  status: { marginHorizontal: Spacing.three, marginBottom: Spacing.two },
 });
