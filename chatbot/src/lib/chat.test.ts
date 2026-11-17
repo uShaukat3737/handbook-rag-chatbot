@@ -52,3 +52,11 @@ test('handleChat sends retrieved passages to the LLM and returns the answer with
   });
   assert.match(prompt, /\[1\] \(leave-policy\.md\)/);
 });
+
+test('handleChat normalizes full-width citation brackets like 【1】 to [1]', async () => {
+  const result = await handleChat(
+    { messages: [{ role: 'user', content: 'How much annual leave?' }] },
+    { chunks, complete: async () => 'You get 27 days【1】.', logError: noLog },
+  );
+  assert.equal((result.body as { answer: string }).answer, 'You get 27 days [1].');
+});
