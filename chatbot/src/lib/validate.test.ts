@@ -18,3 +18,21 @@ test('parseChatRequest rejects malformed, oversized, or non-user-ending conversa
   ];
   for (const body of bad) assert.equal(parseChatRequest(body).ok, false, JSON.stringify(body)?.slice(0, 60));
 });
+
+test('parseChatRequest accepts a valid conversation and trims content', () => {
+  const body = {
+    messages: [
+      { role: 'user', content: ' How many leave days? ' },
+      { role: 'assistant', content: '27 days [1].' },
+      { role: 'user', content: 'And sick leave?\n' },
+    ],
+  };
+  assert.deepEqual(parseChatRequest(body), {
+    ok: true,
+    messages: [
+      { role: 'user', content: 'How many leave days?' },
+      { role: 'assistant', content: '27 days [1].' },
+      { role: 'user', content: 'And sick leave?' },
+    ],
+  });
+});
