@@ -75,3 +75,11 @@ test('handleChat returns a friendly 429 when the LLM provider is out of tokens o
   assert.doesNotMatch(JSON.stringify(result.body), /TPM/);
   assert.deepEqual(logged, ['llm_rate_limited']);
 });
+
+test('handleChat returns only the sources the answer actually cites', async () => {
+  const both = { messages: [{ role: 'user', content: 'annual leave and hotel limit?' }] };
+  const cited = await handleChat(both, { chunks, complete: async () => 'Hotels cap at €180 [2].', logError: noLog });
+  assert.deepEqual((cited.body as { sources: { n: number }[] }).sources.map((s) => s.n), [2]);
+  const none = await handleChat(both, { chunks, complete: async () => "I don't know.", logError: noLog });
+  assert.deepEqual((none.body as { sources: unknown[] }).sources, []);
+});
