@@ -9,6 +9,8 @@ export type Source = { n: number; source: string; heading: string; text: string 
 export type ChatBody = { answer: string; sources: Source[] } | { error: string };
 export type ChatResult = { status: number; body: ChatBody };
 
+const HTTP_TOO_MANY_REQUESTS = 429;
+const LLM_RATE_LIMITED = 'The assistant has hit its usage limit. Please try again in a minute.';
 const LLM_UNAVAILABLE = 'The assistant is unavailable right now. Please try again in a moment.';
 
 export type ChatDeps = {
@@ -32,7 +34,12 @@ export async function handleChat(body: unknown, deps: ChatDeps): Promise<ChatRes
     const sources = hits.map((c, i) => ({ n: i + 1, source: c.source, heading: c.heading, text: c.text }));
     return { status: 200, body: { answer, sources } };
   } catch (error) {
-    deps.logError('llm_request_failed', { message: error instanceof Error ? error.message : String(error) });
+    const message = error instanceof Error ? error.message : String(error);
+    if ((error as { status?: unknown }).status === HTTP_TOO_MANY_REQUESTS) {
+      deps.logError('llm_rate_limited', { message });
+      return { status: HTTP_TOO_MANY_REQUESTS, body: { error: LLM_RATE_LIMITED } };
+    }
+    deps.logError('llm_request_failed', { message });
     return { status: 502, body: { error: LLM_UNAVAILABLE } };
   }
 }
