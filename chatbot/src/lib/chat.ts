@@ -17,13 +17,18 @@ export type ChatDeps = {
   logError: (event: string, context: Record<string, unknown>) => void;
 };
 
+// Some models (gpt-oss) cite as 【1】; the UI expects [1].
+function normalizeCitations(answer: string): string {
+  return answer.replace(/\s*【(\d+)】/g, ' [$1]');
+}
+
 export async function handleChat(body: unknown, deps: ChatDeps): Promise<ChatResult> {
   const parsed = parseChatRequest(body);
   if (!parsed.ok) return { status: 400, body: { error: parsed.error } };
 
   const hits = searchChunks(deps.chunks, retrievalQuery(parsed.messages), TOP_K);
   try {
-    const answer = await deps.complete(buildPrompt(parsed.messages, hits));
+    const answer = normalizeCitations(await deps.complete(buildPrompt(parsed.messages, hits)));
     const sources = hits.map((c, i) => ({ n: i + 1, source: c.source, heading: c.heading, text: c.text }));
     return { status: 200, body: { answer, sources } };
   } catch (error) {
