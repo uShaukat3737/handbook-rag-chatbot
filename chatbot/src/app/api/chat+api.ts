@@ -27,6 +27,7 @@ async function complete(messages: LlmMessage[]): Promise<string> {
     model: process.env.GROQ_MODEL ?? DEFAULT_GROQ_MODEL,
     messages,
     temperature: 0.2,
+    reasoning_effort: 'low', // fewer hidden reasoning tokens -> slower to hit the 8k tokens/min limit
   });
   return response.choices[0]?.message?.content ?? '';
 }
