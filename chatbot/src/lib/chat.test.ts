@@ -34,3 +34,21 @@ test('handleChat returns a generic 502 and logs when the LLM fails, without leak
   assert.doesNotMatch(JSON.stringify(result.body), /gsk_secret|401|invalid api key/);
   assert.deepEqual(logged, ['llm_request_failed']);
 });
+
+test('handleChat sends retrieved passages to the LLM and returns the answer with numbered sources', async () => {
+  let prompt = '';
+  const complete = async (messages: { content: string }[]) => {
+    prompt = messages[0].content;
+    return 'You get 27 days [1].';
+  };
+  const result = await handleChat(
+    { messages: [{ role: 'user', content: 'How much annual leave?' }] },
+    { chunks, complete, logError: noLog },
+  );
+  assert.equal(result.status, 200);
+  assert.deepEqual(result.body, {
+    answer: 'You get 27 days [1].',
+    sources: [{ n: 1, source: 'leave-policy.md', heading: 'Leave > Annual', text: chunks[0].text }],
+  });
+  assert.match(prompt, /\[1\] \(leave-policy\.md\)/);
+});
