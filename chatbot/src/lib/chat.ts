@@ -31,7 +31,9 @@ export async function handleChat(body: unknown, deps: ChatDeps): Promise<ChatRes
   const hits = searchChunks(deps.chunks, retrievalQuery(parsed.messages), TOP_K);
   try {
     const answer = normalizeCitations(await deps.complete(buildPrompt(parsed.messages, hits)));
-    const sources = hits.map((c, i) => ({ n: i + 1, source: c.source, heading: c.heading, text: c.text }));
+    const sources = hits
+      .map((c, i) => ({ n: i + 1, source: c.source, heading: c.heading, text: c.text }))
+      .filter((s) => answer.includes(`[${s.n}]`));
     return { status: 200, body: { answer, sources } };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
