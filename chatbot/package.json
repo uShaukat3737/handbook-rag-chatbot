@@ -39,9 +39,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "node --test 'src/**/*.test.ts'",
-    "ingest": "node scripts/ingest.mts",
-    "eval": "node scripts/eval-retrieval.mts"
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test 'src/**/*.test.ts'",
+    "ingest": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/ingest.mts",
+    "eval": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/eval-retrieval.mts"
   },
   "private": true
 }
