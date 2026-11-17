@@ -60,3 +60,18 @@ test('handleChat normalizes full-width citation brackets like 【1】 to [1]', a
   );
   assert.equal((result.body as { answer: string }).answer, 'You get 27 days [1].');
 });
+
+test('handleChat returns a friendly 429 when the LLM provider is out of tokens or rate limited', async () => {
+  const logged: string[] = [];
+  const complete = async (): Promise<string> => {
+    throw Object.assign(new Error('Rate limit reached for model on tokens per minute (TPM)'), { status: 429 });
+  };
+  const result = await handleChat(
+    { messages: [{ role: 'user', content: 'annual leave?' }] },
+    { chunks, complete, logError: (event) => logged.push(event) },
+  );
+  assert.equal(result.status, 429);
+  assert.match((result.body as { error: string }).error, /usage limit/i);
+  assert.doesNotMatch(JSON.stringify(result.body), /TPM/);
+  assert.deepEqual(logged, ['llm_rate_limited']);
+});
